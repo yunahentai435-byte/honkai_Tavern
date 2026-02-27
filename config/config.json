@@ -1,7 +1,7 @@
 {
   "endpoint": "https://integrate.api.nvidia.com/v1/chat/completions",
   "model": "mistralai/mistral-large-3-675b-instruct-2512",
-  "apiKey": "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",
+  "apiKey": "YOUR_API_KEY_HERE",
   "theme": "sakura-dream",
   "streaming": {
     "enabled": true,

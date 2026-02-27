@@ -1,15 +1,19 @@
 # Chat OpenAI
 
-Aplicación de chat moderna con interfaz web que se conecta a modelos de IA a través de la API de NVIDIA. Soporta streaming de respuestas en tiempo real y fondos personalizables.
+Aplicación de chat moderna con interfaz web que se conecta a modelos de IA a través de la API de NVIDIA (compatible con cualquier API OpenAI-compatible). Soporta streaming de respuestas en tiempo real, temas visuales intercambiables y fondos personalizables.
 
 ## Características
 
 - 💬 Interfaz de chat intuitiva y moderna
-- 🚀 Streaming de respuestas en tiempo real
-- 🎨 Soporte para fondos personalizados
+- 🚀 Streaming de respuestas en tiempo real (modo raw y smooth)
+- 🎨 Sistema de temas CSS intercambiables (Default, Sakura Dream)
+- 🖼️ Soporte para fondos personalizados de página
 - 📝 Renderizado de Markdown en mensajes
+- ⚙️ Panel de configuración integrado en la UI
+- 🔄 Hot reloading de configuración sin recargar la página
+- 🔤 Tipografía personalizable (fuente y tamaño)
 - ⚡ Backend FastAPI con Python
-- 🎯 Frontend con Web Components nativos
+- 🧩 Frontend con Web Components nativos
 
 ## Requisitos
 
@@ -25,6 +29,19 @@ Aplicación de chat moderna con interfaz web que se conecta a modelos de IA a tr
 pip install -r requirements.txt
 ```
 
+## Uso
+
+1. Inicia el servidor:
+```bash
+python start.py
+```
+
+2. Abre tu navegador en: `http://localhost:8080`
+
+3. Escribe tu mensaje y presiona Enter o haz clic en "Enviar"
+
+4. Accede al panel de configuración con el botón ⚙️ en la esquina superior derecha
+
 ## Configuración
 
 Edita el archivo `config/config.json` para personalizar la aplicación:
@@ -34,13 +51,14 @@ Edita el archivo `config/config.json` para personalizar la aplicación:
   "endpoint": "https://integrate.api.nvidia.com/v1/chat/completions",
   "model": "mistralai/mistral-large-3-675b-instruct-2512",
   "apiKey": "tu-api-key-aqui",
+  "theme": "sakura-dream",
   "streaming": {
     "enabled": true,
     "mode": "raw",
     "smoothSpeed": 50
   },
   "background": {
-    "enabled": true,
+    "enabled": false,
     "image": "backgrounds/fondo1.jpg"
   },
   "chatContainer": {
@@ -79,23 +97,24 @@ Edita el archivo `config/config.json` para personalizar la aplicación:
 
 ### Parámetros de configuración
 
-- `endpoint`: URL del endpoint de la API
+- `endpoint`: URL del endpoint de la API (compatible con OpenAI)
 - `model`: Modelo de IA a utilizar
-- `apiKey`: Tu clave de API de NVIDIA
+- `apiKey`: Tu clave de API
+- `theme`: Nombre del tema CSS a aplicar (sin extensión, ej: `"default"`, `"sakura-dream"`)
 - `streaming.enabled`: Activar/desactivar streaming de respuestas
-- `streaming.mode`: Modo de streaming ("raw" o "smooth")
+- `streaming.mode`: Modo de streaming (`"raw"` o `"smooth"`)
 - `streaming.smoothSpeed`: Velocidad de renderizado en modo smooth (ms)
-- `background.enabled`: Activar/desactivar fondo personalizado
+- `background.enabled`: Activar/desactivar fondo personalizado de página
 - `background.image`: Ruta relativa a la imagen de fondo
 - `chatContainer.opacity`: Opacidad del contenedor del chat (0.0 a 1.0)
-- `chatContainer.backgroundType`: Tipo de fondo ("transparent", "color", o "image")
+- `chatContainer.backgroundType`: Tipo de fondo (`"transparent"`, `"color"`, o `"image"`)
 - `chatContainer.backgroundColor`: Color hexadecimal para el fondo del contenedor
 - `chatContainer.backgroundImage`: Ruta a imagen de fondo para el contenedor
 - `chatContainer.blur`: Activar/desactivar efecto blur en el contenedor (true/false)
 - `messageBubbles.user.*`: Configuración de estilo para burbujas del usuario
 - `messageBubbles.assistant.*`: Configuración de estilo para burbujas del asistente
   - `opacity`: Opacidad de la burbuja (0.0 a 1.0)
-  - `backgroundType`: Tipo de fondo ("transparent", "color", o "image")
+  - `backgroundType`: Tipo de fondo (`"transparent"`, `"color"`, o `"image"`)
   - `backgroundColor`: Color hexadecimal de la burbuja
   - `backgroundImage`: Ruta a imagen de fondo para la burbuja
   - `blur`: Activar/desactivar efecto blur en la burbuja (true/false)
@@ -103,6 +122,19 @@ Edita el archivo `config/config.json` para personalizar la aplicación:
 - `typography.fontSize`: Tamaño de fuente en píxeles (número)
 - `hotReload.enabled`: Activar/desactivar recarga automática de configuración (true/false)
 - `hotReload.interval`: Intervalo de verificación de cambios en milisegundos
+
+## Temas visuales
+
+Los temas se almacenan como archivos CSS en la carpeta `themes/`. Para añadir un tema nuevo, crea un archivo `.css` en esa carpeta y selecciónalo desde el panel de configuración o editando `config/config.json`.
+
+Temas incluidos:
+- **default** — Estilo limpio y minimalista
+- **sakura-dream** — Tema rosa con animaciones de pétalos y efectos de brillo
+
+Para activar un tema:
+```json
+"theme": "sakura-dream"
+```
 
 ## Fondos personalizados
 
@@ -157,7 +189,6 @@ Puedes personalizar el contenedor del chat de tres formas:
 
 Cada tipo de mensaje (usuario y asistente) puede tener su propia configuración:
 
-#### Burbujas del usuario
 ```json
 "messageBubbles": {
   "user": {
@@ -165,13 +196,7 @@ Cada tipo de mensaje (usuario y asistente) puede tener su propia configuración:
     "backgroundType": "color",
     "backgroundColor": "#4a90e2",
     "blur": true
-  }
-}
-```
-
-#### Burbujas del asistente con imagen
-```json
-"messageBubbles": {
+  },
   "assistant": {
     "opacity": 0.85,
     "backgroundType": "image",
@@ -180,10 +205,6 @@ Cada tipo de mensaje (usuario y asistente) puede tener su propia configuración:
   }
 }
 ```
-
-#### Opciones de blur
-- `blur: true` - Activa el efecto de desenfoque de fondo (backdrop-filter)
-- `blur: false` - Desactiva el efecto blur para mejor rendimiento
 
 La aplicación soporta formatos: JPG, PNG, GIF, WebP
 
@@ -197,9 +218,6 @@ La aplicación incluye hot reloading de configuración. Cuando está habilitado,
   "interval": 2000
 }
 ```
-
-- `enabled`: Activa o desactiva el hot reload
-- `interval`: Frecuencia de verificación en milisegundos (por defecto 2000ms)
 
 Esto permite ajustar colores, opacidades, fondos y tipografía en tiempo real mientras usas la aplicación.
 
@@ -220,33 +238,20 @@ Ejemplos de fuentes:
 - Monospace: `"'Courier New', Consolas, monospace"`
 - Sistema: `"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto"`
 
-## Uso
-
-1. Inicia el servidor:
-```bash
-python start.py
-```
-
-2. Abre tu navegador en: `http://localhost:8080`
-
-3. Escribe tu mensaje y presiona Enter o haz clic en "Enviar"
-
 ## Estructura del proyecto
 
 ```
 .
 ├── backgrounds/          # Imágenes de fondo
-│   └── fondo1.jpg
-├── config/              # Archivos de configuración
+├── config/               # Archivos de configuración
 │   └── config.json
-├── docs/                # Documentación
-│   ├── README.md
-│   ├── CHANGELOG.md
-│   └── requirements.txt
-├── logic/               # Lógica del servidor
+├── logic/                # Lógica del servidor (Python)
 │   ├── __init__.py
 │   └── server.py
-├── ui/                  # Frontend
+├── themes/               # Temas CSS intercambiables
+│   ├── default.css
+│   └── sakura-dream.css
+├── ui/                   # Frontend
 │   ├── components/
 │   │   ├── chat-app.js
 │   │   └── chat-message.js
@@ -254,13 +259,28 @@ python start.py
 │   ├── app.js
 │   ├── index.html
 │   └── styles.css
-└── start.py            # Punto de entrada
+├── requirements.txt      # Dependencias Python
+└── start.py              # Punto de entrada
 ```
 
 ## API Endpoints
 
 ### GET `/api/config`
 Obtiene la configuración actual de la aplicación.
+
+### POST `/api/config`
+Actualiza y persiste la configuración de la aplicación.
+
+**Body:** objeto JSON con la configuración completa.
+
+### GET `/api/themes`
+Lista los temas CSS disponibles en la carpeta `/themes`.
+
+### GET `/api/custom-css`
+Obtiene el CSS personalizado del archivo `ui/custom.css`.
+
+### POST `/api/custom-css`
+Actualiza el CSS personalizado.
 
 ### POST `/api/chat`
 Envía un mensaje y recibe una respuesta completa.
@@ -273,7 +293,7 @@ Envía un mensaje y recibe una respuesta completa.
 ```
 
 ### POST `/api/chat/stream`
-Envía un mensaje y recibe la respuesta en streaming.
+Envía un mensaje y recibe la respuesta en streaming (Server-Sent Events).
 
 **Body:**
 ```json
@@ -285,20 +305,20 @@ Envía un mensaje y recibe la respuesta en streaming.
 ## Tecnologías utilizadas
 
 ### Backend
-- FastAPI - Framework web moderno y rápido
-- Uvicorn - Servidor ASGI
-- httpx - Cliente HTTP asíncrono
-- Pydantic - Validación de datos
+- **FastAPI** — Framework web moderno y rápido
+- **Uvicorn** — Servidor ASGI
+- **httpx** — Cliente HTTP asíncrono
+- **Pydantic** — Validación de datos
 
 ### Frontend
-- Web Components - Componentes nativos reutilizables
-- Marked.js - Renderizado de Markdown
-- CSS3 - Estilos modernos con backdrop-filter
+- **Web Components** — Componentes nativos reutilizables
+- **Marked.js** — Renderizado de Markdown
+- **CSS3** — Estilos modernos con backdrop-filter y animaciones
 
 ## Solución de problemas
 
 ### El servidor no inicia
-- Verifica que todas las dependencias estén instaladas
+- Verifica que todas las dependencias estén instaladas: `pip install -r requirements.txt`
 - Asegúrate de que el puerto 8080 esté disponible
 
 ### No se muestran respuestas
@@ -310,6 +330,10 @@ Envía un mensaje y recibe la respuesta en streaming.
 - Verifica que la ruta de la imagen sea correcta
 - Asegúrate de que `background.enabled` esté en `true`
 - Comprueba que el archivo de imagen exista en la carpeta `backgrounds/`
+
+### El tema no se aplica
+- Verifica que el archivo `.css` del tema exista en la carpeta `themes/`
+- Comprueba que el nombre en `config.json` coincida exactamente con el nombre del archivo (sin extensión)
 
 ## Licencia
 
