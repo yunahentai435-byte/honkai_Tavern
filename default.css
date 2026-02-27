@@ -1,0 +1,27 @@
+/* Tema: Default - Estilo limpio y minimalista */
+
+/* Contenedor del chat */
+.chat-container {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Blur en contenedor (requiere fondo de página activo) */
+body.with-background .chat-container {
+    backdrop-filter: blur(10px) !important;
+}
+
+/* Burbujas de usuario */
+chat-message[role="user"] .message-box {
+    background: rgba(227, 242, 253, 0.10) !important;
+}
+
+/* Burbujas de asistente */
+chat-message[role="assistant"] .message-box {
+    background: rgba(58, 255, 238, 0.10) !important;
+}
+
+/* Tipografía */
+.message-content {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif !important;
+    font-size: 22px !important;
+}

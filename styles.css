@@ -1,0 +1,436 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: #f5f5f5;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+body.with-background {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+chat-app {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+body.with-background .chat-container {
+    backdrop-filter: blur(10px);
+}
+
+body.with-background .chat-container.no-blur {
+    backdrop-filter: none;
+}
+
+.config-button {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 44px;
+    height: 44px;
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s;
+    z-index: 100;
+}
+
+.config-button:hover {
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transform: scale(1.05);
+}
+
+.config-button:active {
+    transform: scale(0.95);
+}
+
+.config-button svg {
+    color: #1976d2;
+}
+
+.config-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.config-modal.active {
+    display: flex;
+}
+
+.config-modal-content {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.config-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.config-modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #212121;
+}
+
+.config-close {
+    background: none;
+    border: none;
+    font-size: 32px;
+    color: #757575;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.config-close:hover {
+    background: #f5f5f5;
+    color: #212121;
+}
+
+.config-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.config-section {
+    margin-bottom: 24px;
+}
+
+.config-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #212121;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #1976d2;
+}
+
+.config-field {
+    margin-bottom: 16px;
+}
+
+.config-field label {
+    display: block;
+    font-size: 14px;
+    color: #424242;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.config-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.config-select:focus {
+    outline: none;
+    border-color: #1976d2;
+}
+
+.config-range {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #e0e0e0;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.config-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #1976d2;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.config-range::-webkit-slider-thumb:hover {
+    background: #1565c0;
+    transform: scale(1.1);
+}
+
+.config-range::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #1976d2;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+.config-range::-moz-range-thumb:hover {
+    background: #1565c0;
+    transform: scale(1.1);
+}
+
+.config-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.config-input:focus {
+    outline: none;
+    border-color: #1976d2;
+}
+
+.config-color {
+    width: 100%;
+    height: 44px;
+    padding: 4px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.config-color:focus {
+    outline: none;
+    border-color: #1976d2;
+}
+
+.config-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.config-checkbox-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #1976d2;
+}
+
+.config-checkbox-label span {
+    font-size: 14px;
+    color: #424242;
+}
+
+.config-hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #757575;
+    font-style: italic;
+}
+
+.config-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+    resize: vertical;
+    min-height: 200px;
+    transition: border-color 0.2s;
+    line-height: 1.5;
+}
+
+.config-textarea:focus {
+    outline: none;
+    border-color: #1976d2;
+}
+
+.config-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.config-button-primary,
+.config-button-secondary {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.config-button-primary {
+    background: #1976d2;
+    color: white;
+}
+
+.config-button-primary:hover {
+    background: #1565c0;
+}
+
+.config-button-primary:active {
+    transform: scale(0.98);
+}
+
+.config-button-secondary {
+    background: #f5f5f5;
+    color: #424242;
+}
+
+.config-button-secondary:hover {
+    background: #e0e0e0;
+}
+
+.config-button-secondary:active {
+    transform: scale(0.98);
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 16px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 2000;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s;
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.notification-success {
+    background: #4caf50;
+    color: white;
+}
+
+.notification-error {
+    background: #f44336;
+    color: white;
+}
+
+.messages-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.input-container {
+    padding: 20px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    gap: 12px;
+}
+
+.input-field {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input-field:focus {
+    border-color: #1976d2;
+}
+
+.input-field:disabled {
+    background: #f5f5f5;
+    cursor: not-allowed;
+}
+
+.send-button {
+    padding: 12px 24px;
+    background: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.send-button:hover:not(:disabled) {
+    background: #1565c0;
+}
+
+.send-button:disabled {
+    background: #bdbdbd;
+    cursor: not-allowed;
+}

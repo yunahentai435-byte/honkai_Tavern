@@ -1,0 +1,23 @@
+{
+  "endpoint": "https://integrate.api.nvidia.com/v1/chat/completions",
+  "model": "mistralai/mistral-large-3-675b-instruct-2512",
+  "apiKey": "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",
+  "theme": "sakura-dream",
+  "streaming": {
+    "enabled": true,
+    "mode": "raw",
+    "smoothSpeed": 50
+  },
+  "background": {
+    "enabled": false,
+    "image": "backgrounds/fondo1.jpg"
+  },
+  "typography": {
+    "fontFamily": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif",
+    "fontSize": 22
+  },
+  "hotReload": {
+    "enabled": true,
+    "interval": 3000
+  }
+}

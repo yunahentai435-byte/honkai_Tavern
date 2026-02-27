@@ -1,0 +1,214 @@
+/* Tema: Sakura Dream - Versión Transparente para Android */
+
+/* Fondo con pétalos animados (se verá a través del contenedor) */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: radial-gradient(circle at 20% 30%, rgba(255, 200, 230, 0.4) 0%, transparent 30%),
+                radial-gradient(circle at 90% 70%, rgba(255, 180, 210, 0.3) 0%, transparent 40%),
+                repeating-linear-gradient(45deg, rgba(255, 200, 220, 0.1) 0px, rgba(255, 200, 220, 0.1) 15px, transparent 15px, transparent 30px);
+    animation: drift 25s infinite alternate;
+    z-index: -1;
+}
+
+@keyframes drift {
+    0% { background-position: 0% 0%, 0% 0%, 0% 0%; }
+    100% { background-position: 10% 10%, -5% 5%, 5% -5%; }
+}
+
+/* Pétalos cayendo */
+body::after {
+    content: '';
+    position: fixed;
+    top: -10%;
+    left: 0;
+    width: 100%;
+    height: 110%;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" opacity="0.3"><circle cx="10" cy="10" r="8" fill="%23ffb7c5" transform="rotate(45)"/><circle cx="50" cy="30" r="6" fill="%23ff9ebb" transform="rotate(-20)"/><circle cx="90" cy="15" r="7" fill="%23ffc0cb"/><circle cx="130" cy="25" r="9" fill="%23ffa5b9" transform="rotate(15)"/><circle cx="170" cy="8" r="5" fill="%23ffd1dc" transform="rotate(30)"/><circle cx="30" cy="70" r="8" fill="%23ffb3c6" transform="rotate(-10)"/><circle cx="70" cy="55" r="6" fill="%23ff99cc"/><circle cx="110" cy="80" r="7" fill="%23ffc2d1" transform="rotate(25)"/><circle cx="150" cy="65" r="8" fill="%23ffa5b9"/><circle cx="190" cy="90" r="6" fill="%23ffb7c5" transform="rotate(40)"/></svg>');
+    background-size: 250px 250px;
+    pointer-events: none;
+    animation: fall 15s linear infinite;
+    z-index: 0;
+}
+
+@keyframes fall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 0.6; }
+    100% { transform: translateY(100%) rotate(360deg); opacity: 0; }
+}
+
+/* Contenedor principal - COMPLETAMENTE TRANSPARENTE */
+.chat-container {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 10px !important;
+}
+
+/* Burbujas de usuario - efecto sakura flotante */
+chat-message[role="user"] .message-box {
+    background: rgba(255, 220, 240, 0.85) !important;
+    backdrop-filter: blur(8px) !important;
+    border: 2px solid rgba(255, 255, 255, 0.6) !important;
+    border-radius: 35px 35px 15px 35px !important;
+    box-shadow: 0 8px 20px rgba(255, 120, 160, 0.3), 0 4px 0 0 #ffd9e8 inset !important;
+    color: #3a1e2a !important;
+    font-weight: 500;
+    transform-origin: right bottom;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: visible;
+}
+
+chat-message[role="user"] .message-box::after {
+    content: "🌸";
+    position: absolute;
+    bottom: -15px;
+    right: -10px;
+    font-size: 24px;
+    opacity: 0.6;
+    filter: drop-shadow(0 4px 4px rgba(255, 100, 150, 0.3));
+    transform: rotate(10deg);
+}
+
+/* Burbujas del asistente - efecto celestial transparente */
+chat-message[role="assistant"] .message-box {
+    background: rgba(230, 245, 255, 0.85) !important;
+    backdrop-filter: blur(8px) !important;
+    border: 2px solid rgba(255, 255, 255, 0.8) !important;
+    border-radius: 35px 35px 35px 15px !important;
+    box-shadow: 0 8px 20px rgba(120, 180, 255, 0.3), 0 0 20px rgba(255, 255, 240, 0.5) !important;
+    color: #1e3a5f !important;
+    position: relative;
+}
+
+chat-message[role="assistant"] .message-box::before {
+    content: "✨";
+    position: absolute;
+    top: -12px;
+    left: -8px;
+    font-size: 28px;
+    opacity: 0.7;
+    filter: drop-shadow(0 0 6px gold);
+    transform: rotate(-15deg);
+}
+
+chat-message[role="assistant"] .message-box::after {
+    content: "⭐";
+    position: absolute;
+    bottom: -12px;
+    left: 20px;
+    font-size: 22px;
+    opacity: 0.5;
+    filter: drop-shadow(0 0 4px white);
+}
+
+/* Tipografía grande y juguetona */
+.message-content {
+    font-family: 'Hiragino Maru Gothic', 'Roboto', 'Droid Sans', sans-serif !important;
+    font-size: 22px !important;
+    line-height: 1.5 !important;
+    letter-spacing: 0.02em !important;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8) !important;
+    padding: 16px 22px !important;
+}
+
+/* Efecto hover en burbujas */
+chat-message .message-box:hover {
+    transform: scale(1.02) translateY(-3px) !important;
+    filter: brightness(1.05) !important;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+/* Decoración de rama en la esquina (sutil) */
+.chat-container {
+    position: relative;
+}
+
+.chat-container::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle at 30% 30%, #ffb7c5 0%, transparent 70%);
+    opacity: 0.15;
+    border-radius: 50%;
+    filter: blur(15px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.chat-container::after {
+    content: '';
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle at 70% 70%, #a0d0ff 0%, transparent 70%);
+    opacity: 0.1;
+    border-radius: 50%;
+    filter: blur(20px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Scrollbar delicada */
+::-webkit-scrollbar {
+    width: 8px;
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 180, 200, 0.4);
+    border-radius: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 140, 170, 0.6);
+}
+
+/* Animación suave de brillo en las burbujas */
+@keyframes softGlow {
+    0% { box-shadow: 0 8px 20px rgba(255, 120, 160, 0.2), 0 4px 0 0 #ffd9e8 inset; }
+    50% { box-shadow: 0 8px 25px rgba(255, 100, 150, 0.4), 0 4px 0 0 #ffe4f0 inset; }
+    100% { box-shadow: 0 8px 20px rgba(255, 120, 160, 0.2), 0 4px 0 0 #ffd9e8 inset; }
+}
+
+chat-message[role="user"] .message-box {
+    animation: softGlow 4s infinite ease-in-out;
+}
+
+@keyframes starGlow {
+    0% { box-shadow: 0 8px 20px rgba(120, 180, 255, 0.2), 0 0 10px rgba(255, 255, 240, 0.3); }
+    50% { box-shadow: 0 8px 25px rgba(100, 160, 255, 0.4), 0 0 20px rgba(255, 255, 200, 0.6); }
+    100% { box-shadow: 0 8px 20px rgba(120, 180, 255, 0.2), 0 0 10px rgba(255, 255, 240, 0.3); }
+}
+
+chat-message[role="assistant"] .message-box {
+    animation: starGlow 5s infinite ease-in-out;
+}
+
+/* Separador de fecha (si existe) */
+.chat-date-separator {
+    background: rgba(255, 220, 240, 0.3) !important;
+    backdrop-filter: blur(4px) !important;
+    border-radius: 30px !important;
+    color: #5a3a4a !important;
+    font-size: 16px !important;
+    padding: 6px 18px !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    margin: 15px auto !important;
+    width: fit-content !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.05em !important;
+}
