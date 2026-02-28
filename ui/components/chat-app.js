@@ -13,6 +13,9 @@ class ChatApp extends HTMLElement {
     }
 
     async connectedCallback() {
+        // DEBUG: Log viewport dimensions on load
+        console.log(`[DEBUG connectedCallback] window.innerHeight=${window.innerHeight}, screen.height=${screen.height}, devicePixelRatio=${window.devicePixelRatio}`);
+        console.log(`[DEBUG connectedCallback] CSS supports dvh: ${'CSS' in window && CSS.supports('height', '100dvh')}`);
         await this.api.loadConfig();
         await this.loadAvailableThemes();
         this.applyTheme();
@@ -20,6 +23,16 @@ class ChatApp extends HTMLElement {
         this.render();
         this.attachEventListeners();
         this.startHotReload();
+        
+        // DEBUG: Log input-container position after initial render
+        setTimeout(() => {
+            const ic = this.querySelector('.input-container');
+            if (ic) {
+                const rect = ic.getBoundingClientRect();
+                console.log(`[DEBUG connectedCallback AFTER RENDER] input-container: top=${rect.top.toFixed(1)}, bottom=${rect.bottom.toFixed(1)}, height=${rect.height.toFixed(1)}, windowInnerHeight=${window.innerHeight}`);
+                console.log(`[DEBUG connectedCallback AFTER RENDER] Is input-container below viewport? ${rect.top >= window.innerHeight}`);
+            }
+        }, 200);
     }
 
     disconnectedCallback() {
@@ -169,6 +182,14 @@ class ChatApp extends HTMLElement {
     render() {
         const hasModal = !!this.querySelector('#configModal');
         
+        // DEBUG: Log render calls to track when input-container is being recreated
+        console.log(`[DEBUG render()] hasModal=${hasModal}, loading=${this.loading}, timestamp=${Date.now()}`);
+        const inputContainerBefore = this.querySelector('.input-container');
+        if (inputContainerBefore) {
+            const rect = inputContainerBefore.getBoundingClientRect();
+            console.log(`[DEBUG render()] input-container BEFORE: top=${rect.top.toFixed(1)}, bottom=${rect.bottom.toFixed(1)}, height=${rect.height.toFixed(1)}, visible=${rect.bottom > 0 && rect.top < window.innerHeight}`);
+        }
+        
         if (!hasModal) {
             // Primera vez, crear todo
             this.innerHTML = `
@@ -218,6 +239,8 @@ class ChatApp extends HTMLElement {
             // Ya existe el modal, solo actualizar input y botón
             const inputContainer = this.querySelector('.input-container');
             if (inputContainer) {
+                // DEBUG: Log that we're replacing input-container innerHTML
+                console.log(`[DEBUG render()] Replacing input-container innerHTML (loading=${this.loading})`);
                 inputContainer.innerHTML = `
                     <textarea
                         class="input-field"
@@ -243,6 +266,16 @@ class ChatApp extends HTMLElement {
         }
         
         this.renderMessages();
+        
+        // DEBUG: Log input-container position AFTER render
+        setTimeout(() => {
+            const inputContainerAfter = this.querySelector('.input-container');
+            if (inputContainerAfter) {
+                const rect = inputContainerAfter.getBoundingClientRect();
+                console.log(`[DEBUG render() AFTER] input-container: top=${rect.top.toFixed(1)}, bottom=${rect.bottom.toFixed(1)}, height=${rect.height.toFixed(1)}, windowInnerHeight=${window.innerHeight}, visible=${rect.bottom > 0 && rect.top < window.innerHeight}`);
+                console.log(`[DEBUG render() AFTER] chat-container height: ${this.querySelector('.chat-container')?.getBoundingClientRect().height.toFixed(1)}, body overflow: ${document.body.style.overflow}`);
+            }
+        }, 50);
     }
 
     renderMessages() {
@@ -464,7 +497,12 @@ class ChatApp extends HTMLElement {
             inputField.style.height = 'auto';
         }
         this.loading = true;
+        // DEBUG: Log first render call (loading=true)
+        console.log(`[DEBUG sendMessage()] Calling render() with loading=true`);
         this.render();
+        // DEBUG: After first render, re-attach event listeners (they are lost when input-container is replaced)
+        console.log(`[DEBUG sendMessage()] Re-attaching event listeners after loading=true render`);
+        this.attachEventListeners();
 
         if (this.api.config.streaming?.enabled) {
             await this.sendStreamingRequest(message);
@@ -473,7 +511,12 @@ class ChatApp extends HTMLElement {
         }
 
         this.loading = false;
+        // DEBUG: Log second render call (loading=false)
+        console.log(`[DEBUG sendMessage()] Calling render() with loading=false`);
         this.render();
+        // DEBUG: After second render, re-attach event listeners
+        console.log(`[DEBUG sendMessage()] Re-attaching event listeners after loading=false render`);
+        this.attachEventListeners();
     }
 
     async sendNormalRequest(message) {
