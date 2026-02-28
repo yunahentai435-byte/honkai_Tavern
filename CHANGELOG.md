@@ -5,6 +5,36 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [1.3.0] - 2026-02-27
+
+### Añadido
+- Sistema de temas CSS intercambiables
+  - Carpeta `/themes` para almacenar archivos CSS de temas
+  - Selector de temas en el panel de configuración
+  - Temas incluidos: Default, Sakura Dream
+  - Carga dinámica de temas disponibles desde el servidor
+  - Los temas se aplican inmediatamente al seleccionar
+  - Sistema extensible: agregar nuevos temas es tan simple como crear un archivo `.css` en `/themes`
+- Panel de configuración UI integrado en la interfaz
+  - Botón de configuración con icono SVG en esquina superior derecha
+  - Modal responsive para pantallas 20:9 (Android)
+  - Configuración de tipografía (fuente y tamaño)
+  - Configuración de modo streaming (sin streaming, raw, smooth)
+  - Guardado persistente de configuración vía API
+  - Notificaciones de éxito/error
+  - Botón de restablecer configuración
+- Endpoint `/api/themes` para listar temas disponibles
+- Endpoint `/api/custom-css` para leer/escribir CSS personalizado
+
+### Cambiado
+- Reorganización del proyecto en estructura de directorios:
+  - `logic/` — lógica del servidor (Python)
+  - `ui/` — frontend (HTML, JS, CSS)
+  - `ui/components/` — Web Components
+  - `themes/` — archivos CSS de temas
+  - `config/` — configuración JSON
+  - `backgrounds/` — imágenes de fondo
+
 ## [1.2.0] - 2026-02-27
 
 ### Añadido
@@ -69,14 +99,14 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - Soporte para modo streaming y no-streaming
 
 ### Componentes
-- `start.py` - Punto de entrada principal
-- `logic/server.py` - Servidor FastAPI con endpoints de chat
-- `ui/components/chat-app.js` - Componente principal de la aplicación
-- `ui/components/chat-message.js` - Componente para renderizar mensajes
-- `ui/api.js` - Cliente API para comunicación con el backend
-- `ui/index.html` - Página principal
-- `ui/styles.css` - Estilos de la aplicación
-- `config/config.json` - Archivo de configuración
+- `start.py` — Punto de entrada principal
+- `logic/server.py` — Servidor FastAPI con endpoints de chat
+- `ui/components/chat-app.js` — Componente principal de la aplicación
+- `ui/components/chat-message.js` — Componente para renderizar mensajes
+- `ui/api.js` — Cliente API para comunicación con el backend
+- `ui/index.html` — Página principal
+- `ui/styles.css` — Estilos de la aplicación
+- `config/config.json` — Archivo de configuración
 
 ### Características técnicas
 - Arquitectura cliente-servidor separada
@@ -89,31 +119,12 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
-### En desarrollo
-- Sistema de temas (v1.2.1)
-  - Carpeta /themes para almacenar archivos CSS de temas
-  - Selector de temas en el panel de configuración
-  - Temas incluidos: Default, Sakura Dream
-  - Carga dinámica de temas disponibles
-  - Los temas se aplican inmediatamente al seleccionar
-  - Sistema extensible: agregar nuevos temas es tan simple como crear un archivo .css en /themes
-
-- Panel de configuración UI (v1.2.1)
-  - Botón de configuración con icono SVG en esquina superior derecha
-  - Modal responsive para pantallas 20:9 (Android)
-  - Configuración de tipografía (fuente y tamaño)
-  - Configuración de modo streaming (sin streaming, raw, smooth)
-  - Guardado persistente de configuración
-  - Notificaciones de éxito/error
-  - Botón de restablecer configuración
-
 ### Planeado
 - Historial de conversaciones persistente
 - Múltiples temas de color
 - Soporte para adjuntar archivos
 - Exportar conversaciones
 - Modo oscuro
-- Configuración de usuario en la UI
 - Múltiples modelos de IA seleccionables
 - Búsqueda en conversaciones
 - Atajos de teclado personalizables
