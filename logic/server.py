@@ -51,6 +51,8 @@ def create_app():
     async def get_custom_css():
         try:
             css_path = Path(__file__).parent.parent / 'ui' / 'custom.css'
+            if not css_path.exists():
+                return ""
             with open(css_path, 'r', encoding='utf-8') as f:
                 return f.read()
         except Exception as e:
@@ -154,7 +156,8 @@ def create_app():
         return StreamingResponse(event_generator(), media_type='text/event-stream')
     
     backgrounds_path = Path(__file__).parent.parent / 'backgrounds'
-    app.mount("/backgrounds", StaticFiles(directory=str(backgrounds_path)), name="backgrounds")
+    if backgrounds_path.exists():
+        app.mount("/backgrounds", StaticFiles(directory=str(backgrounds_path)), name="backgrounds")
     
     themes_path = Path(__file__).parent.parent / 'themes'
     app.mount("/themes", StaticFiles(directory=str(themes_path)), name="themes")
