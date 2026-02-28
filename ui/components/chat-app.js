@@ -19,7 +19,6 @@ class ChatApp extends HTMLElement {
         this.applyBackground();
         this.render();
         this.attachEventListeners();
-        this.applyChatContainerStyle();
         this.startHotReload();
     }
 
@@ -73,15 +72,19 @@ class ChatApp extends HTMLElement {
             
             if (this.lastConfigHash !== newHash) {
                 console.log('Config changed, reloading...');
+                const prevInterval = this.api.config.hotReload?.interval;
+                const prevEnabled = this.api.config.hotReload?.enabled;
                 this.lastConfigHash = newHash;
                 this.api.config = newConfig;
+                this.applyTheme();
                 this.applyBackground();
-                this.applyChatContainerStyle();
                 this.renderMessages();
                 
-                // Reiniciar hot reload si cambió la configuración
-                this.stopHotReload();
-                this.startHotReload();
+                // Reiniciar hot reload solo si cambió el intervalo o el estado habilitado
+                if (newConfig.hotReload?.interval !== prevInterval || newConfig.hotReload?.enabled !== prevEnabled) {
+                    this.stopHotReload();
+                    this.startHotReload();
+                }
             }
         } catch (error) {
             console.error('Error checking config changes:', error);
@@ -94,48 +97,6 @@ class ChatApp extends HTMLElement {
             document.body.classList.add('with-background');
             document.body.style.backgroundImage = `url('/${bgConfig.image}')`;
         }
-    }
-
-    applyChatContainerStyle() {
-        const container = this.querySelector('.chat-container');
-        if (!container) return;
-
-        const containerConfig = this.api.config.chatContainer;
-        if (!containerConfig) return;
-
-        const opacity = containerConfig.opacity ?? 1;
-        const bgType = containerConfig.backgroundType || 'transparent';
-        const blur = containerConfig.blur ?? true;
-
-        // Aplicar o remover blur
-        if (!blur) {
-            container.classList.add('no-blur');
-        } else {
-            container.classList.remove('no-blur');
-        }
-
-        if (bgType === 'color' && containerConfig.backgroundColor) {
-            const hexColor = containerConfig.backgroundColor;
-            const rgb = this.hexToRgb(hexColor);
-            if (rgb) {
-                container.style.background = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
-            }
-        } else if (bgType === 'image' && containerConfig.backgroundImage) {
-            container.style.backgroundImage = `url('/${containerConfig.backgroundImage}')`;
-            container.style.backgroundColor = `rgba(255, 255, 255, ${opacity})`;
-            container.style.backgroundBlendMode = 'overlay';
-        } else {
-            container.style.background = `rgba(255, 255, 255, ${opacity})`;
-        }
-    }
-
-    hexToRgb(hex) {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? {
-            r: parseInt(result[1], 16),
-            g: parseInt(result[2], 16),
-            b: parseInt(result[3], 16)
-        } : null;
     }
 
     renderConfigContent() {
@@ -272,7 +233,6 @@ class ChatApp extends HTMLElement {
         }
         
         this.renderMessages();
-        this.applyChatContainerStyle();
     }
 
     renderMessages() {
@@ -284,12 +244,6 @@ class ChatApp extends HTMLElement {
             const messageEl = document.createElement('chat-message');
             messageEl.setAttribute('role', msg.role);
             messageEl.setAttribute('content', msg.content);
-            
-            // Pasar configuración de burbujas
-            const bubbleConfig = this.api.config.messageBubbles?.[msg.role];
-            if (bubbleConfig) {
-                messageEl.setAttribute('bubble-config', JSON.stringify(bubbleConfig));
-            }
             
             // Pasar configuración de tipografía
             const typographyConfig = this.api.config.typography;
@@ -420,7 +374,6 @@ class ChatApp extends HTMLElement {
                 this.api.config = updatedConfig;
                 this.applyTheme();
                 this.applyBackground();
-                this.applyChatContainerStyle();
                 this.renderMessages();
                 
                 // Cerrar modal
@@ -445,8 +398,6 @@ class ChatApp extends HTMLElement {
             this.render();
             this.attachEventListeners();
             this.applyBackground();
-            this.applyChatContainerStyle();
-            this.renderMessages();
             this.showNotification('Configuración restablecida');
         }
     }
@@ -521,13 +472,6 @@ class ChatApp extends HTMLElement {
         const messageEl = container?.children[index];
         if (messageEl) {
             messageEl.setAttribute('content', this.messages[index].content);
-            
-            // Actualizar configuración de burbujas si es necesario
-            const msg = this.messages[index];
-            const bubbleConfig = this.api.config.messageBubbles?.[msg.role];
-            if (bubbleConfig) {
-                messageEl.setAttribute('bubble-config', JSON.stringify(bubbleConfig));
-            }
             
             // Actualizar configuración de tipografía
             const typographyConfig = this.api.config.typography;
