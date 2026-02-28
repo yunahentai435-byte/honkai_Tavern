@@ -2,22 +2,42 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    /* Prevent text size adjustment on orientation change (Android) */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+html {
+    /* Prevent overscroll bounce on Android */
+    overscroll-behavior: none;
+    height: 100%;
 }
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     background: #f5f5f5;
-    height: 100vh;
+    /* Use dvh (dynamic viewport height) to account for Android browser chrome/keyboard */
+    height: 100dvh;
+    height: 100vh; /* fallback */
     display: flex;
     justify-content: center;
     align-items: center;
+    /* Prevent overscroll on body */
+    overscroll-behavior: none;
+    overflow: hidden;
+    /* Safe area insets for notched/punch-hole Android devices */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
 }
 
 body.with-background {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-attachment: fixed;
+    /* background-attachment: fixed is broken on Android Chrome - use scroll instead */
+    background-attachment: scroll;
 }
 
 chat-app {
@@ -29,7 +49,9 @@ chat-app {
 .chat-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    /* Use dvh for dynamic viewport height (handles Android keyboard correctly) */
+    height: 100dvh;
+    height: 100vh; /* fallback */
     max-width: 800px;
     margin: 0 auto;
     background: white;
@@ -37,6 +59,9 @@ chat-app {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    /* Prevent overscroll within container */
+    overscroll-behavior: contain;
+    position: relative;
 }
 
 body.with-background .chat-container {
@@ -47,12 +72,15 @@ body.with-background .chat-container.no-blur {
     backdrop-filter: none;
 }
 
+/* ===== CONFIG BUTTON ===== */
 .config-button {
     position: absolute;
-    top: 16px;
-    right: 16px;
-    width: 44px;
-    height: 44px;
+    /* Account for Android status bar via safe area */
+    top: max(16px, calc(env(safe-area-inset-top) + 8px));
+    right: max(16px, calc(env(safe-area-inset-right) + 8px));
+    /* Minimum 48x48dp touch target for Android */
+    width: 48px;
+    height: 48px;
     border: none;
     background: rgba(255, 255, 255, 0.9);
     border-radius: 50%;
@@ -61,24 +89,31 @@ body.with-background .chat-container.no-blur {
     align-items: center;
     justify-content: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    transition: all 0.2s;
+    transition: background 0.2s, box-shadow 0.2s;
     z-index: 100;
+    /* Improve touch response */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.config-button:hover {
-    background: rgba(255, 255, 255, 1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    transform: scale(1.05);
+/* Remove hover on touch devices to avoid stuck hover state */
+@media (hover: hover) {
+    .config-button:hover {
+        background: rgba(255, 255, 255, 1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
 }
 
 .config-button:active {
-    transform: scale(0.95);
+    transform: scale(0.92);
+    background: rgba(240, 240, 240, 1);
 }
 
 .config-button svg {
     color: #1976d2;
 }
 
+/* ===== CONFIG MODAL ===== */
 .config-modal {
     display: none;
     position: fixed;
@@ -88,8 +123,10 @@ body.with-background .chat-container.no-blur {
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
     z-index: 1000;
-    align-items: center;
+    align-items: flex-end; /* Bottom sheet on mobile */
     justify-content: center;
+    /* Prevent background scroll when modal is open */
+    overscroll-behavior: contain;
 }
 
 .config-modal.active {
@@ -98,54 +135,105 @@ body.with-background .chat-container.no-blur {
 
 .config-modal-content {
     background: white;
-    border-radius: 16px;
-    width: 90%;
-    max-width: 500px;
-    max-height: 80vh;
+    /* Bottom sheet style on mobile */
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-width: 100%;
+    /* Use dvh for proper height calculation with keyboard */
+    max-height: 85dvh;
+    max-height: 85vh; /* fallback */
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.2);
+    /* Safe area for bottom notch/home indicator */
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* On larger screens, use centered dialog */
+@media (min-width: 600px) {
+    .config-modal {
+        align-items: center;
+    }
+    .config-modal-content {
+        border-radius: 16px;
+        width: 90%;
+        max-width: 500px;
+        max-height: 80dvh;
+        max-height: 80vh;
+        padding-bottom: 0;
+    }
+}
+
+/* Bottom sheet drag handle */
+.config-modal-content::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+    margin: 12px auto 0;
+    flex-shrink: 0;
+}
+
+@media (min-width: 600px) {
+    .config-modal-content::before {
+        display: none;
+    }
 }
 
 .config-modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
+    padding: 16px 20px;
     border-bottom: 1px solid #e0e0e0;
+    flex-shrink: 0;
 }
 
 .config-modal-header h2 {
     margin: 0;
-    font-size: 20px;
+    font-size: 18px;
     color: #212121;
 }
 
 .config-close {
     background: none;
     border: none;
-    font-size: 32px;
+    font-size: 28px;
     color: #757575;
     cursor: pointer;
-    width: 40px;
-    height: 40px;
+    /* Minimum 48x48dp touch target */
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    transition: all 0.2s;
+    transition: background 0.2s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.config-close:hover {
-    background: #f5f5f5;
-    color: #212121;
+@media (hover: hover) {
+    .config-close:hover {
+        background: #f5f5f5;
+        color: #212121;
+    }
+}
+
+.config-close:active {
+    background: #e0e0e0;
 }
 
 .config-modal-body {
-    padding: 20px;
+    padding: 16px 20px;
     overflow-y: auto;
     flex: 1;
+    /* Momentum scrolling on Android/iOS */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
 }
 
 .config-section {
@@ -153,10 +241,10 @@ body.with-background .chat-container.no-blur {
 }
 
 .config-section-title {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     color: #212121;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     padding-bottom: 8px;
     border-bottom: 2px solid #1976d2;
 }
@@ -175,13 +263,24 @@ body.with-background .chat-container.no-blur {
 
 .config-select {
     width: 100%;
-    padding: 10px;
+    /* Minimum 48px height for comfortable touch */
+    padding: 12px;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
-    font-size: 14px;
+    /* 16px minimum to prevent zoom on focus in Android Chrome */
+    font-size: 16px;
     background: white;
     cursor: pointer;
     transition: border-color 0.2s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    /* Remove default iOS/Android styling */
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23757575' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
 }
 
 .config-select:focus {
@@ -196,46 +295,52 @@ body.with-background .chat-container.no-blur {
     background: #e0e0e0;
     outline: none;
     -webkit-appearance: none;
+    appearance: none;
+    /* Larger touch area for range slider on Android */
+    padding: 12px 0;
+    cursor: pointer;
+    touch-action: pan-x;
 }
 
 .config-range::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 20px;
-    height: 20px;
+    /* 28px for easier touch on Android */
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: #1976d2;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: background 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-.config-range::-webkit-slider-thumb:hover {
+.config-range::-webkit-slider-thumb:active {
     background: #1565c0;
-    transform: scale(1.1);
+    transform: scale(1.15);
 }
 
 .config-range::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: #1976d2;
     cursor: pointer;
     border: none;
-    transition: all 0.2s;
-}
-
-.config-range::-moz-range-thumb:hover {
-    background: #1565c0;
-    transform: scale(1.1);
+    transition: background 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .config-input {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
-    font-size: 14px;
+    /* 16px minimum to prevent zoom on focus in Android Chrome */
+    font-size: 16px;
     transition: border-color 0.2s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .config-input:focus {
@@ -245,12 +350,13 @@ body.with-background .chat-container.no-blur {
 
 .config-color {
     width: 100%;
-    height: 44px;
+    height: 48px;
     padding: 4px;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     cursor: pointer;
     transition: border-color 0.2s;
+    touch-action: manipulation;
 }
 
 .config-color:focus {
@@ -261,20 +367,28 @@ body.with-background .chat-container.no-blur {
 .config-checkbox-label {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     cursor: pointer;
     user-select: none;
+    /* Minimum touch target height */
+    min-height: 48px;
+    padding: 4px 0;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .config-checkbox-label input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
+    /* Larger checkbox for touch */
+    width: 24px;
+    height: 24px;
     cursor: pointer;
     accent-color: #1976d2;
+    flex-shrink: 0;
+    touch-action: manipulation;
 }
 
 .config-checkbox-label span {
-    font-size: 14px;
+    font-size: 15px;
     color: #424242;
 }
 
@@ -291,12 +405,14 @@ body.with-background .chat-container.no-blur {
     padding: 12px;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
-    font-size: 13px;
+    font-size: 14px;
     font-family: 'Courier New', monospace;
-    resize: vertical;
-    min-height: 200px;
+    /* Disable manual resize on mobile (causes layout issues) */
+    resize: none;
+    min-height: 160px;
     transition: border-color 0.2s;
     line-height: 1.5;
+    touch-action: manipulation;
 }
 
 .config-textarea:focus {
@@ -307,21 +423,24 @@ body.with-background .chat-container.no-blur {
 .config-actions {
     display: flex;
     gap: 12px;
-    margin-top: 24px;
-    padding-top: 20px;
+    margin-top: 20px;
+    padding-top: 16px;
     border-top: 1px solid #e0e0e0;
 }
 
 .config-button-primary,
 .config-button-secondary {
     flex: 1;
-    padding: 12px;
+    /* Minimum 48px height for touch */
+    padding: 14px 12px;
     border: none;
-    border-radius: 8px;
-    font-size: 14px;
+    border-radius: 10px;
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: background 0.2s, transform 0.1s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .config-button-primary {
@@ -329,12 +448,15 @@ body.with-background .chat-container.no-blur {
     color: white;
 }
 
-.config-button-primary:hover {
-    background: #1565c0;
+@media (hover: hover) {
+    .config-button-primary:hover {
+        background: #1565c0;
+    }
 }
 
 .config-button-primary:active {
-    transform: scale(0.98);
+    background: #1565c0;
+    transform: scale(0.97);
 }
 
 .config-button-secondary {
@@ -342,32 +464,41 @@ body.with-background .chat-container.no-blur {
     color: #424242;
 }
 
-.config-button-secondary:hover {
-    background: #e0e0e0;
+@media (hover: hover) {
+    .config-button-secondary:hover {
+        background: #e0e0e0;
+    }
 }
 
 .config-button-secondary:active {
-    transform: scale(0.98);
+    background: #e0e0e0;
+    transform: scale(0.97);
 }
 
+/* ===== NOTIFICATIONS ===== */
 .notification {
     position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 16px 24px;
-    border-radius: 8px;
+    /* Account for Android status bar */
+    top: max(20px, calc(env(safe-area-inset-top) + 12px));
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    /* Full width on mobile with margins */
+    width: calc(100% - 32px);
+    max-width: 400px;
+    padding: 14px 20px;
+    border-radius: 10px;
     font-size: 14px;
     font-weight: 500;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     z-index: 2000;
     opacity: 0;
-    transform: translateY(-20px);
-    transition: all 0.3s;
+    transition: opacity 0.3s, transform 0.3s;
+    text-align: center;
 }
 
 .notification.show {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(-50%) translateY(0);
 }
 
 .notification-success {
@@ -380,30 +511,55 @@ body.with-background .chat-container.no-blur {
     color: white;
 }
 
+/* ===== MESSAGES CONTAINER ===== */
 .messages-container {
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
+    /* Momentum scrolling on Android */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 16px 12px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+    /* Prevent content from going under input on Android */
+    scroll-padding-bottom: 8px;
 }
 
+/* ===== INPUT CONTAINER ===== */
 .input-container {
-    padding: 20px;
+    padding: 12px;
+    /* Safe area for bottom navigation bar on Android */
+    padding-bottom: max(12px, calc(env(safe-area-inset-bottom) + 8px));
     border-top: 1px solid #e0e0e0;
     display: flex;
-    gap: 12px;
+    gap: 10px;
+    align-items: flex-end;
+    background: white;
+    /* Ensure input stays above keyboard */
+    flex-shrink: 0;
 }
 
 .input-field {
     flex: 1;
-    padding: 12px;
+    padding: 12px 14px;
     border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    font-size: 14px;
+    border-radius: 24px;
+    /* 16px minimum to prevent zoom on focus in Android Chrome */
+    font-size: 16px;
     outline: none;
     transition: border-color 0.2s;
+    /* Prevent zoom on double-tap */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    /* Smooth resize */
+    resize: none;
+    line-height: 1.4;
+    max-height: 120px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    /* Align with send button */
+    align-self: center;
 }
 
 .input-field:focus {
@@ -413,24 +569,74 @@ body.with-background .chat-container.no-blur {
 .input-field:disabled {
     background: #f5f5f5;
     cursor: not-allowed;
+    opacity: 0.7;
 }
 
+/* ===== SEND BUTTON ===== */
 .send-button {
-    padding: 12px 24px;
+    /* Fixed size circle button - icon only on mobile */
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
     background: #1976d2;
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 50%;
     font-size: 14px;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    /* Padding for text fallback */
+    padding: 0;
 }
 
-.send-button:hover:not(:disabled) {
+@media (hover: hover) {
+    .send-button:hover:not(:disabled) {
+        background: #1565c0;
+    }
+}
+
+.send-button:active:not(:disabled) {
     background: #1565c0;
+    transform: scale(0.92);
 }
 
 .send-button:disabled {
     background: #bdbdbd;
     cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Send button SVG icon */
+.send-button .send-icon {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: white;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Show text label on larger screens */
+@media (min-width: 600px) {
+    .send-button {
+        width: auto;
+        height: 48px;
+        border-radius: 24px;
+        padding: 0 20px;
+        gap: 6px;
+    }
+    .send-button .send-label {
+        display: inline;
+    }
+}
+
+.send-button .send-label {
+    display: none;
 }

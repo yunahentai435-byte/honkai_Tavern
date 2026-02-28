@@ -174,7 +174,7 @@ class ChatApp extends HTMLElement {
             this.innerHTML = `
                 <div class="chat-container">
                     <button class="config-button" id="configButton" aria-label="Configuración">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="3"></circle>
                             <path d="M12 1v6m0 6v6m5.2-13.2l-4.2 4.2m-2 2l-4.2 4.2m13.2-5.2l-6 0m-6 0l-6 0m13.2 5.2l-4.2-4.2m-2-2l-4.2-4.2"></path>
                         </svg>
@@ -183,7 +183,7 @@ class ChatApp extends HTMLElement {
                         <div class="config-modal-content">
                             <div class="config-modal-header">
                                 <h2>Configuración</h2>
-                                <button class="config-close" id="configClose">&times;</button>
+                                <button class="config-close" id="configClose" aria-label="Cerrar">&times;</button>
                             </div>
                             <div class="config-modal-body">
                                 ${this.renderConfigContent()}
@@ -192,19 +192,24 @@ class ChatApp extends HTMLElement {
                     </div>
                     <div class="messages-container" id="messagesContainer"></div>
                     <div class="input-container">
-                        <input 
-                            type="text" 
-                            class="input-field" 
+                        <textarea
+                            class="input-field"
                             id="inputField"
                             placeholder="Escribe tu mensaje..."
+                            rows="1"
                             ${this.loading ? 'disabled' : ''}
-                        />
-                        <button 
-                            class="send-button" 
+                        ></textarea>
+                        <button
+                            class="send-button"
                             id="sendButton"
+                            aria-label="Enviar"
                             ${this.loading || !this.getInputValue() ? 'disabled' : ''}
                         >
-                            ${this.loading ? '...' : 'Enviar'}
+                            <svg class="send-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                            <span class="send-label">${this.loading ? 'Enviando...' : 'Enviar'}</span>
                         </button>
                     </div>
                 </div>
@@ -214,19 +219,24 @@ class ChatApp extends HTMLElement {
             const inputContainer = this.querySelector('.input-container');
             if (inputContainer) {
                 inputContainer.innerHTML = `
-                    <input 
-                        type="text" 
-                        class="input-field" 
+                    <textarea
+                        class="input-field"
                         id="inputField"
                         placeholder="Escribe tu mensaje..."
+                        rows="1"
                         ${this.loading ? 'disabled' : ''}
-                    />
-                    <button 
-                        class="send-button" 
+                    ></textarea>
+                    <button
+                        class="send-button"
                         id="sendButton"
+                        aria-label="Enviar"
                         ${this.loading || !this.getInputValue() ? 'disabled' : ''}
                     >
-                        ${this.loading ? '...' : 'Enviar'}
+                        <svg class="send-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                        <span class="send-label">${this.loading ? 'Enviando...' : 'Enviar'}</span>
                     </button>
                 `;
             }
@@ -261,18 +271,23 @@ class ChatApp extends HTMLElement {
         const input = this.querySelector('#inputField');
         const button = this.querySelector('#sendButton');
 
-        // Event listeners para input y botón de envío
-        input?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !this.loading) {
-                this.sendMessage();
-            }
-        });
+        // Auto-grow textarea on Android
+        if (input) {
+            input.addEventListener('input', () => {
+                this._autoGrowTextarea(input);
+                if (button) {
+                    button.disabled = this.loading || !this.getInputValue();
+                }
+            });
 
-        input?.addEventListener('input', () => {
-            if (button) {
-                button.disabled = this.loading || !this.getInputValue();
-            }
-        });
+            // Send on Enter (but not Shift+Enter for newlines)
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey && !this.loading) {
+                    e.preventDefault();
+                    this.sendMessage();
+                }
+            });
+        }
 
         button?.addEventListener('click', () => this.sendMessage());
 
@@ -285,6 +300,8 @@ class ChatApp extends HTMLElement {
             configButton.setAttribute('data-listener', 'true');
             configButton.addEventListener('click', () => {
                 configModal?.classList.add('active');
+                // Prevent body scroll when modal is open
+                document.body.style.overflow = 'hidden';
             });
         }
 
@@ -292,6 +309,7 @@ class ChatApp extends HTMLElement {
             configClose.setAttribute('data-listener', 'true');
             configClose.addEventListener('click', () => {
                 configModal?.classList.remove('active');
+                document.body.style.overflow = '';
             });
         }
 
@@ -300,12 +318,21 @@ class ChatApp extends HTMLElement {
             configModal.addEventListener('click', (e) => {
                 if (e.target === configModal) {
                     configModal.classList.remove('active');
+                    document.body.style.overflow = '';
                 }
             });
         }
 
         // Config panel event listeners
         this.attachConfigListeners();
+    }
+
+    _autoGrowTextarea(textarea) {
+        // Reset height to auto to get correct scrollHeight
+        textarea.style.height = 'auto';
+        // Set height to scrollHeight (capped by CSS max-height)
+        const newHeight = Math.min(textarea.scrollHeight, 120);
+        textarea.style.height = newHeight + 'px';
     }
 
     attachConfigListeners() {
@@ -378,6 +405,7 @@ class ChatApp extends HTMLElement {
                 
                 // Cerrar modal
                 this.querySelector('#configModal')?.classList.remove('active');
+                document.body.style.overflow = '';
                 
                 // Mostrar feedback
                 this.showNotification('Configuración guardada correctamente');
@@ -398,6 +426,7 @@ class ChatApp extends HTMLElement {
             this.render();
             this.attachEventListeners();
             this.applyBackground();
+            document.body.style.overflow = '';
             this.showNotification('Configuración restablecida');
         }
     }
@@ -428,7 +457,12 @@ class ChatApp extends HTMLElement {
         if (!message || this.loading) return;
 
         this.messages.push({ role: 'user', content: message });
-        this.querySelector('#inputField').value = '';
+        const inputField = this.querySelector('#inputField');
+        if (inputField) {
+            inputField.value = '';
+            // Reset textarea height after clearing
+            inputField.style.height = 'auto';
+        }
         this.loading = true;
         this.render();
 
